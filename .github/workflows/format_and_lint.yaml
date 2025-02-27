@@ -31,4 +31,4 @@ jobs:
         run: pnpm install
 
       - name: Check
-        run: pnpm check:ci
+        run: pnpm ci:check

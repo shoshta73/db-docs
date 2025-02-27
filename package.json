@@ -41,7 +41,8 @@
 		"lint": "pnpm biome lint --write .",
 		"lint:ci": "pnpm biome lint .",
 		"check": "pnpm biome check --write .",
-		"check:ci": "./scripts/check.sh"
+		"check:ci": "pnpm biome check .",
+		"ci:check": "./scripts/check.sh"
 	},
 	"pnpm": {
 		"ignoredBuiltDependencies": ["@biomejs/biome", "@swc/core", "esbuild"]
