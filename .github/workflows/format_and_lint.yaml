@@ -10,6 +10,8 @@ on:
 
 jobs:
   format_and_lint:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,3 +39,6 @@ jobs:
 
       - name: Check
         run: pnpm ci:check
+
+      - name: Push
+        run: git push
