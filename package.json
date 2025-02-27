@@ -28,7 +28,9 @@
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
 		"format": "pnpm biome format --write .",
+		"format:ci": "pnpm biome format .",
 		"lint": "pnpm biome lint --write .",
+		"lint:ci": "pnpm biome lint .",
 		"check": "pnpm biome check --write .",
 		"check:ci": "pnpm biome check ."
 	},
