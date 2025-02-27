@@ -11,12 +11,20 @@
 	},
 	"packageManager": "pnpm@10.5.2",
 	"devDependencies": {
+		"@types/node": "22.13.5",
+		"@types/react": "19.0.10",
+		"@types/react-dom": "19.0.4",
+		"@vitejs/plugin-react-swc": "3.8.0",
+		"typescript": "5.7.3",
 		"vite": "6.2.0"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"react": "19.0.0",
+		"react-dom": "19.0.0"
+	},
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build",
+		"build": "tsc -b && vite build",
 		"preview": "vite preview"
 	}
 }
