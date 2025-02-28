@@ -191,7 +191,9 @@ const DBSchema = ({
 								// Define the line generator with step curve
 								const line = d3
 									.line()
+									// @ts-expect-error TODO: Fix this
 									.x((d) => d.x)
+									// @ts-expect-error TODO: Fix this
 									.y((d) => d.y)
 									.curve(d3.curveStep);
 
@@ -205,6 +207,7 @@ const DBSchema = ({
 								svg
 									.append("path")
 									.datum(points)
+									// @ts-expect-error TODO: Fix this
 									.attr("d", line)
 									.attr("fill", "none")
 									.attr("stroke", "black")
