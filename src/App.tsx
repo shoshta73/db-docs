@@ -13,6 +13,7 @@ import {
 } from "./components/ui/tooltip";
 import { Tooltip } from "@radix-ui/react-tooltip";
 import type { ColumnData, TableData } from "./types/db";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 
 function PKIcon() {
 	return (
@@ -235,7 +236,7 @@ const DBSchema = ({
 	);
 };
 
-export default function App() {
+const MainApp = () => {
 	return (
 		<>
 			<h1 className="text-3xl font-bold underline">Db Docs</h1>
@@ -243,4 +244,15 @@ export default function App() {
 			<DBSchema schema={schema} connections={connections} />
 		</>
 	);
+};
+
+const router = createHashRouter([
+	{
+		path: "/",
+		element: <MainApp />,
+	},
+]);
+
+export default function App() {
+	return <RouterProvider router={router} />;
 }
