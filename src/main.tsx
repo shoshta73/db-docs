@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 
-import App from "./App";
 import { StrictMode } from "react";
+import App from "./App";
 
 let root = document.getElementById("app");
 if (root === null) {

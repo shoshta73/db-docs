@@ -4,16 +4,16 @@ import * as d3 from "d3";
 
 // @ts-expect-error Cannot find module './main.css' or its corresponding type declarations.ts(2307)
 import "./main.css";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
+import { Tooltip } from "@radix-ui/react-tooltip";
+import { RouterProvider, createHashRouter } from "react-router-dom";
 import { Badge } from "./components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import {
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "./components/ui/tooltip";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import type { ColumnData, TableData } from "./types/db";
-import { createHashRouter, RouterProvider } from "react-router-dom";
 
 function PKIcon() {
 	return (
