@@ -52,9 +52,9 @@ const schema: TableData[] = [
 	{
 		tableName: "Users",
 		columns: [
-			{ name: "id", type: "INT", pk: true }, // Primary Key
-			{ name: "name", type: "VARCHAR(255)" },
-			{ name: "email", type: "VARCHAR(255)" },
+			{ name: "id", type: "INT", pk: true, fk: "ContactInfo.id" }, // Primary Key
+			{ name: "user_name", type: "VARCHAR(255)", fk: "ContactInfo.user_id" }, // Foreign Key to "ContactInfo" table
+			{ name: "email", type: "VARCHAR(255)", fk: "ContactInfo.email" }, // Foreign Key to "ContactInfo" table
 			{ name: "role_id", type: "INT", fk: "Roles.id" }, // Foreign Key to "Roles" table
 		],
 		position: { x: 100, y: 100 }, // Initial position of the table
@@ -65,7 +65,19 @@ const schema: TableData[] = [
 			{ name: "id", type: "INT", pk: true }, // Primary Key
 			{ name: "role_name", type: "VARCHAR(255)" },
 		],
-		position: { x: 400, y: 300 }, // Initial position of the table
+		position: { x: 600, y: 500 }, // Initial position of the table
+	},
+	{
+		tableName: "ContactInfo",
+		columns: [
+			{ name: "id", type: "INT", pk: true }, // Primary Key
+			{ name: "user_id", type: "VARCHAR(255)" },
+			{ name: "first_name", type: "VARCHAR(255)" },
+			{ name: "last_name", type: "VARCHAR(255)" },
+			{ name: "email", type: "VARCHAR(255)" },
+			{ name: "phone_number", type: "VARCHAR(255)" },
+		],
+		position: { x: 500, y: 100 }, // Initial position of the table
 	},
 ];
 
@@ -89,6 +101,36 @@ const connections: Connection[] = [
 		to: {
 			tableName: "Roles",
 			columnName: "id",
+		},
+	},
+	{
+		from: {
+			tableName: "Users",
+			columnName: "id",
+		},
+		to: {
+			tableName: "ContactInfo",
+			columnName: "id",
+		},
+	},
+	{
+		from: {
+			tableName: "Users",
+			columnName: "user_name",
+		},
+		to: {
+			tableName: "ContactInfo",
+			columnName: "user_id",
+		},
+	},
+	{
+		from: {
+			tableName: "Users",
+			columnName: "email",
+		},
+		to: {
+			tableName: "ContactInfo",
+			columnName: "email",
 		},
 	},
 ];
