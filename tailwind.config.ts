@@ -5,6 +5,10 @@ module.exports = {
 	darkMode: ["class"],
 	content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
 	theme: {
+		fontFamily: {
+			mono: ["Geist-Mono", "monospace"],
+			sans: ["Geist", "sans-serif"],
+		},
 		extend: {
 			borderRadius: {
 				lg: "var(--radius)",

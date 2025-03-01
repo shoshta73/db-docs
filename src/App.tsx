@@ -151,7 +151,7 @@ const DBSchema = ({
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const svgRef = useRef<SVGSVGElement | null>(null);
-	const [tables, setTables] = useState<TableData[]>(schema);
+	const [tables] = useState<TableData[]>(schema);
 	const { theme } = useSettingsStore();
 	const [dims, setDims] = useState({ width: 2000, height: 2000 });
 
