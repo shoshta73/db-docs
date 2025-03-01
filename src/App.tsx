@@ -5,7 +5,7 @@ import * as d3 from "d3";
 // @ts-expect-error Cannot find module './main.css' or its corresponding type declarations.ts(2307)
 import "./main.css";
 import { Tooltip } from "@radix-ui/react-tooltip";
-import { RouterProvider, createHashRouter } from "react-router-dom";
+import { Outlet, RouterProvider, createHashRouter } from "react-router-dom";
 import { Badge } from "./components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import {
@@ -14,6 +14,9 @@ import {
 	TooltipTrigger,
 } from "./components/ui/tooltip";
 import type { ColumnData, TableData } from "./types/db";
+import { Button } from "./components/ui/button";
+import { useSettingsStore } from "./stores/settings";
+import { MoonIcon, SunIcon } from "lucide-react";
 
 function PKIcon() {
 	return (
@@ -62,7 +65,7 @@ const schema: TableData[] = [
 			{ name: "id", type: "INT", pk: true }, // Primary Key
 			{ name: "role_name", type: "VARCHAR(255)" },
 		],
-		position: { x: 600, y: 300 }, // Initial position of the table
+		position: { x: 400, y: 300 }, // Initial position of the table
 	},
 ];
 
@@ -116,9 +119,10 @@ function Table({ table }: { table: TableData }) {
 						<li
 							key={`${col.name}-${idx}`}
 							id={`${table.tableName}-${col.name}`}
-							className="flex justify-between p-2 border-b last:border-none"
+							className="flex justify-between p-2 border"
+							data-table={table.tableName}
+							data-column={col.name}
 						>
-							{/* Field Name */}
 							<span
 								className="font-medium font-mono"
 								style={{ minWidth: `${maxWidth}ch` }}
@@ -126,12 +130,9 @@ function Table({ table }: { table: TableData }) {
 								{col.name}
 							</span>
 
-							{/* PK/KF Icons */}
-
 							{col.pk ? <PKIcon /> : <></>}
 							{col.fk ? <FKIcon /> : <></>}
 
-							{/* Data Type and Icons for PK/FK */}
 							<span className="text-gray-500 text-sm">{col.type}</span>
 						</li>
 					);
@@ -144,112 +145,217 @@ function Table({ table }: { table: TableData }) {
 const DBSchema = ({
 	schema,
 	connections,
-}: { schema: TableData[]; connections: Connection[] }) => {
+}: {
+	schema: TableData[];
+	connections: Connection[];
+}) => {
+	const containerRef = useRef<HTMLDivElement>(null);
 	const svgRef = useRef<SVGSVGElement | null>(null);
-	const [tables, _] = useState<TableData[]>(schema); // Store table positions
+	const [tables, setTables] = useState<TableData[]>(schema);
+	const { theme } = useSettingsStore();
+	const [dims, setDims] = useState({ width: 2000, height: 2000 });
 
-	// 🎯 Draw Foreign Key Relationships with D3
+	// Calculate and update the SVG dimensions based on table positions
 	useEffect(() => {
-		const svg = d3.select(svgRef.current); // Select the SVG element
-		svg.selectAll("*").remove(); // Clear previous lines before redrawing
+		const calculateDimensions = () => {
+			let maxX = 0;
+			let maxY = 0;
 
-		for (const conn of connections) {
-			for (const tbl of tables) {
-				if (conn.from.tableName === tbl.tableName) {
-					for (const col of tbl.columns) {
-						if (col.name === conn.from.columnName) {
-							const from = document.getElementById(
-								`${tbl.tableName}-${col.name}`,
-							);
-							console.log("🚀 ~ useEffect ~ from:", from);
-							console.log(
-								"🚀 ~ useEffect ~ from:",
-								`${tbl.tableName}-${col.name}`,
-							);
+			for (const table of tables) {
+				const tableElement = document.getElementById(table.tableName);
+				if (tableElement) {
+					const rect = tableElement.getBoundingClientRect();
+					const right = table.position.x + rect.width;
+					const bottom = table.position.y + rect.height;
 
-							const to = document.getElementById(
-								`${conn.to.tableName}-${conn.to.columnName}`,
-							);
-							console.log("🚀 ~ useEffect ~ to:", to);
-							console.log(
-								"🚀 ~ useEffect ~ to:",
-								`${conn.to.tableName}-${conn.to.columnName}`,
-							);
-
-							if (from && to) {
-								const fromRect = from.getBoundingClientRect();
-								console.log("🚀 ~ useEffect ~ fromRect:", fromRect);
-
-								const toRect = to.getBoundingClientRect();
-								console.log("🚀 ~ useEffect ~ toRect:", toRect);
-
-								// Calculate center points
-								const sourceX = fromRect.x + fromRect.width / 2;
-								const sourceY = fromRect.y - fromRect.height;
-								const targetX = toRect.x + toRect.width / 2;
-								const targetY = toRect.y - toRect.height;
-
-								// Define the line generator with step curve
-								const line = d3
-									.line()
-									// @ts-expect-error TODO: Fix this
-									.x((d) => d.x)
-									// @ts-expect-error TODO: Fix this
-									.y((d) => d.y)
-									.curve(d3.curveStep);
-
-								// Create points array for the line
-								const points = [
-									{ x: sourceX, y: sourceY },
-									{ x: targetX, y: targetY },
-								];
-
-								// Draw the path
-								svg
-									.append("path")
-									.datum(points)
-									// @ts-expect-error TODO: Fix this
-									.attr("d", line)
-									.attr("fill", "none")
-									.attr("stroke", "black")
-									.attr("stroke-width", 2);
-							}
-						}
-					}
+					if (right > maxX) maxX = right;
+					if (bottom > maxY) maxY = bottom;
 				}
 			}
-		}
-	}, [tables, connections]); // Run this effect when the `tables` state updates
+
+			// Add some padding
+			setDims({
+				width: maxX + 200,
+				height: maxY + 200,
+			});
+		};
+
+		// Run after DOM has had time to render tables
+		setTimeout(calculateDimensions, 100);
+
+		window.addEventListener("resize", calculateDimensions);
+		return () => window.removeEventListener("resize", calculateDimensions);
+	}, [tables]);
+
+	// Draw Foreign Key Relationships with D3
+	useEffect(() => {
+		if (!svgRef.current || !containerRef.current) return;
+
+		// Redraw function that will run after a small delay to ensure DOM is ready
+		const drawConnections = () => {
+			const svg = d3.select(svgRef.current);
+			svg.selectAll("*").remove(); // Clear previous lines
+
+			// Create arrowhead marker definition
+			const defs = svg.append("defs");
+			defs
+				.append("marker")
+				.attr("id", "arrowhead")
+				.attr("viewBox", "0 -5 10 10")
+				.attr("refX", 5)
+				.attr("refY", 0)
+				.attr("markerWidth", 6)
+				.attr("markerHeight", 6)
+				.attr("orient", "auto")
+				.append("path")
+				.attr("d", "M0,-5L10,0L0,5")
+				.attr("fill", theme === "light" ? "#000000" : "#ffffff");
+
+			for (const conn of connections) {
+				const fromElement = document.getElementById(
+					`${conn.from.tableName}-${conn.from.columnName}`,
+				);
+				const toElement = document.getElementById(
+					`${conn.to.tableName}-${conn.to.columnName}`,
+				);
+
+				if (!fromElement || !toElement) {
+					console.log(
+						"Elements not found:",
+						`${conn.from.tableName}-${conn.from.columnName}`,
+						`${conn.to.tableName}-${conn.to.columnName}`,
+					);
+					return;
+				}
+
+				// Get table positions from the schema (these are absolute positions)
+				const fromTable = tables.find(
+					(t) => t.tableName === conn.from.tableName,
+				);
+				const toTable = tables.find((t) => t.tableName === conn.to.tableName);
+
+				if (!fromTable || !toTable) return;
+
+				// Get bounding rectangles
+				const fromRect = fromElement.getBoundingClientRect();
+				const toRect = toElement.getBoundingClientRect();
+				const fromTableElement = document.getElementById(fromTable.tableName);
+				const toTableElement = document.getElementById(toTable.tableName);
+
+				if (!fromTableElement || !toTableElement) return;
+
+				// Get table rectangles
+				const fromTableRect = fromTableElement.getBoundingClientRect();
+				const toTableRect = toTableElement.getBoundingClientRect();
+
+				// Calculate positions directly based on schema positions and offsets within tables
+				const sourceX = fromRect.right;
+				const sourceY =
+					fromTable.position.y +
+					(fromRect.top - fromTableRect.top) +
+					fromRect.height / 2;
+
+				const targetX = toRect.left;
+				const targetY =
+					toTable.position.y +
+					(toRect.top - toTableRect.top) +
+					toRect.height / 2;
+
+				// Create the path
+				const midX = (sourceX + targetX) / 2;
+				const line = d3.path();
+
+				// Draw the curved line
+				line.moveTo(sourceX, sourceY);
+				line.bezierCurveTo(
+					midX,
+					sourceY, // Control point 1
+					midX,
+					targetY, // Control point 2
+					targetX,
+					targetY, // End point
+				);
+
+				// Add the path to the SVG
+				svg
+					.append("path")
+					.attr("d", line.toString())
+					.attr("fill", "none")
+					.attr("stroke", theme === "light" ? "#000000" : "#ffffff")
+					.attr("stroke-width", 2)
+					.attr("marker-end", "url(#arrowhead)");
+			}
+		};
+
+		// Delay drawing to make sure DOM elements are ready
+		const timer = setTimeout(drawConnections, 300);
+
+		return () => clearTimeout(timer);
+	}, [tables, connections, theme]);
 
 	return (
-		<div className="relative w-full h-screen bg-gray-100">
-			{/* Background Container for the Schema */}
+		<div
+			ref={containerRef}
+			className="relative w-full h-[calc(100vh-56px)] overflow-auto bg-background"
+		>
+			<div
+				className="relative"
+				style={{ width: `${dims.width}px`, height: `${dims.height}px` }}
+			>
+				<svg
+					ref={svgRef}
+					width={dims.width}
+					height={dims.height}
+					className="absolute top-0 left-0 pointer-events-none"
+					style={{ zIndex: 10 }}
+				/>
 
-			{/* SVG for Drawing Relationship Lines */}
-			<svg ref={svgRef} className="absolute top-0 left-0 w-full h-full" />
-
-			{/* Render All Tables */}
-			{tables.map((table) => (
-				<Table key={table.tableName} table={table} />
-			))}
+				{tables.map((table) => (
+					<Table key={table.tableName} table={table} />
+				))}
+			</div>
 		</div>
 	);
 };
 
-const MainApp = () => {
+function Header() {
+	const { theme, toggleTheme } = useSettingsStore();
+
 	return (
-		<>
-			<h1 className="text-3xl font-bold underline">Db Docs</h1>
-			<p>Its empty here. Come by later.</p>
-			<DBSchema schema={schema} connections={connections} />
-		</>
+		<div className="w-full flex h-14 items-center px-2">
+			<div className="flex-1" />
+			<h1>Db Docs</h1>
+			<div className="flex-1" />
+			<Button variant="outline" onClick={toggleTheme}>
+				{theme === "light" ? <MoonIcon /> : <SunIcon />}
+			</Button>
+		</div>
 	);
+}
+
+function Container() {
+	return (
+		<div className="bg-background max-w-screen max-h-screen">
+			<Header />
+			<Outlet />
+		</div>
+	);
+}
+
+const MainApp = () => {
+	return <DBSchema schema={schema} connections={connections} />;
 };
 
 const router = createHashRouter([
 	{
 		path: "/",
-		element: <MainApp />,
+		element: <Container />,
+		children: [
+			{
+				index: true,
+				element: <MainApp />,
+			},
+		],
 	},
 ]);
 
