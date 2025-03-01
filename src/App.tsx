@@ -5,18 +5,18 @@ import * as d3 from "d3";
 // @ts-expect-error Cannot find module './main.css' or its corresponding type declarations.ts(2307)
 import "./main.css";
 import { Tooltip } from "@radix-ui/react-tooltip";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { Outlet, RouterProvider, createHashRouter } from "react-router-dom";
 import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import {
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "./components/ui/tooltip";
-import type { ColumnData, TableData } from "./types/db";
-import { Button } from "./components/ui/button";
 import { useSettingsStore } from "./stores/settings";
-import { MoonIcon, SunIcon } from "lucide-react";
+import type { ColumnData, TableData } from "./types/db";
 
 function PKIcon() {
 	return (
