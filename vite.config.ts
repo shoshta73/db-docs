@@ -30,7 +30,11 @@ export default defineConfig(() => {
 							"react-dom/client",
 							"react-router-dom",
 						],
-						radix: ["@radix-ui/react-tooltip", "@radix-ui/react-slot"],
+						ui: [
+							"@radix-ui/react-tooltip",
+							"@radix-ui/react-slot",
+							"react-resizable-panels",
+						],
 						d3: ["d3"],
 						zustand: ["zustand", "zustand/middleware"],
 						tailwind: [
@@ -40,6 +44,7 @@ export default defineConfig(() => {
 							"tailwindcss-animate",
 						],
 						lucide: ["lucide-react"],
+						editor: ["@uiw/react-textarea-code-editor"],
 					},
 				},
 			},
