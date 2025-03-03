@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import * as d3 from "d3";
+// import CodeEditor from "@uiw/react-textarea-code-editor";
 
 // @ts-expect-error Cannot find module './main.css' or its corresponding type declarations.ts(2307)
 import "./main.css";
@@ -19,6 +20,7 @@ import {
 
 const PKIcon = lazy(() => import("./components/icons/PrimaryKey"));
 const FKIcon = lazy(() => import("./components/icons/ForeignKey"));
+const CodeEditor = lazy(() => import("@uiw/react-textarea-code-editor"));
 
 const schema: TableData[] = [
 	{
@@ -369,6 +371,7 @@ function Container() {
 }
 
 const MainApp = () => {
+	const theme = useSettingsStore((state) => state.theme);
 	return (
 		<ResizablePanelGroup
 			direction="horizontal"
@@ -379,7 +382,24 @@ const MainApp = () => {
 				<DBSchema schema={schema} connections={connections} />
 			</ResizablePanel>
 			<ResizableHandle withHandle />
-			<ResizablePanel>Editor</ResizablePanel>
+			<ResizablePanel>
+				<Suspense
+					fallback={
+						<div className="flex justify-center items-center h-full">
+							<Spinner size={128} className="m-auto" />
+						</div>
+					}
+				>
+					<CodeEditor
+						value={"console.log('Hello World!')"}
+						language="js"
+						style={{
+							fontFamily: "Geist-Mono, monospace",
+						}}
+						data-color-mode={theme}
+					/>
+				</Suspense>
+			</ResizablePanel>
 		</ResizablePanelGroup>
 	);
 };
