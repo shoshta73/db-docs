@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import * as d3 from "d3";
 
@@ -10,16 +10,14 @@ import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { useSettingsStore } from "./stores/settings";
 import type { ColumnData, TableData } from "./types/db";
-import { Spinner } from "./components/Spinner";
 import {
 	ResizableHandle,
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "./components/ui/resizable";
 import { useStateStore } from "./stores/state";
-
-const PKIcon = lazy(() => import("./components/icons/PrimaryKey"));
-const FKIcon = lazy(() => import("./components/icons/ForeignKey"));
+import PrimaryKey from "./components/icons/PrimaryKey";
+import ForeignKey from "./components/icons/ForeignKey";
 
 const schema: TableData[] = [
 	{
@@ -145,20 +143,8 @@ function Table({ table }: { table: TableData }) {
 								{col.name}
 							</span>
 
-							{col.pk ? (
-								<Suspense fallback={<Spinner size={16} />}>
-									<PKIcon />
-								</Suspense>
-							) : (
-								<></>
-							)}
-							{col.fk ? (
-								<Suspense fallback={<Spinner size={16} />}>
-									<FKIcon />
-								</Suspense>
-							) : (
-								<></>
-							)}
+							{col.pk ? <PrimaryKey /> : <></>}
+							{col.fk ? <ForeignKey /> : <></>}
 
 							<span className="text-gray-500 text-sm">{col.type}</span>
 						</li>
