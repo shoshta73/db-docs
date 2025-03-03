@@ -52,10 +52,6 @@
 		"ci:check": "./scripts/check.sh"
 	},
 	"pnpm": {
-		"ignoredBuiltDependencies": [
-			"@biomejs/biome",
-			"@swc/core",
-			"esbuild"
-		]
+		"ignoredBuiltDependencies": ["@biomejs/biome", "@swc/core", "esbuild"]
 	}
 }
