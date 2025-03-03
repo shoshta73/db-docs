@@ -1,52 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import * as d3 from "d3";
 
 // @ts-expect-error Cannot find module './main.css' or its corresponding type declarations.ts(2307)
 import "./main.css";
-import { Tooltip } from "@radix-ui/react-tooltip";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { Outlet, RouterProvider, createHashRouter } from "react-router-dom";
-import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import {
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "./components/ui/tooltip";
 import { useSettingsStore } from "./stores/settings";
 import type { ColumnData, TableData } from "./types/db";
+import { Spinner } from "./components/Spinner";
 
-function PKIcon() {
-	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger>
-					<Badge>🔑</Badge>
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>Primary Key</p>
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-	);
-}
-
-function FKIcon() {
-	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger>
-					<Badge>🔗</Badge>
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>Foreign Key</p>
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-	);
-}
+const PKIcon = lazy(() => import("./components/icons/PrimaryKey"));
+const FKIcon = lazy(() => import("./components/icons/ForeignKey"));
 
 const schema: TableData[] = [
 	{
@@ -172,8 +139,20 @@ function Table({ table }: { table: TableData }) {
 								{col.name}
 							</span>
 
-							{col.pk ? <PKIcon /> : <></>}
-							{col.fk ? <FKIcon /> : <></>}
+							{col.pk ? (
+								<Suspense fallback={<Spinner size={16} />}>
+									<PKIcon />
+								</Suspense>
+							) : (
+								<></>
+							)}
+							{col.fk ? (
+								<Suspense fallback={<Spinner size={16} />}>
+									<FKIcon />
+								</Suspense>
+							) : (
+								<></>
+							)}
 
 							<span className="text-gray-500 text-sm">{col.type}</span>
 						</li>
