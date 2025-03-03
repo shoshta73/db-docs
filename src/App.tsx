@@ -17,6 +17,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "./components/ui/resizable";
+import { useStateStore } from "./stores/state";
 
 const PKIcon = lazy(() => import("./components/icons/PrimaryKey"));
 const FKIcon = lazy(() => import("./components/icons/ForeignKey"));
@@ -372,17 +373,20 @@ function Container() {
 
 const MainApp = () => {
 	const theme = useSettingsStore((state) => state.theme);
+	const { editorSize, setEditorSize } = useStateStore();
+
 	return (
 		<ResizablePanelGroup
 			direction="horizontal"
 			className="h-fit"
 			style={{ height: undefined }}
+			onLayout={(sizes) => setEditorSize(sizes[0])}
 		>
-			<ResizablePanel>
+			<ResizablePanel defaultSize={editorSize}>
 				<DBSchema schema={schema} connections={connections} />
 			</ResizablePanel>
 			<ResizableHandle withHandle />
-			<ResizablePanel>
+			<ResizablePanel defaultSize={100 - editorSize}>
 				<Suspense
 					fallback={
 						<div className="flex justify-center items-center h-full">
