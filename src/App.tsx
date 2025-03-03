@@ -11,6 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { useSettingsStore } from "./stores/settings";
 import type { ColumnData, TableData } from "./types/db";
 import { Spinner } from "./components/Spinner";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "./components/ui/resizable";
 
 const PKIcon = lazy(() => import("./components/icons/PrimaryKey"));
 const FKIcon = lazy(() => import("./components/icons/ForeignKey"));
@@ -364,7 +369,19 @@ function Container() {
 }
 
 const MainApp = () => {
-	return <DBSchema schema={schema} connections={connections} />;
+	return (
+		<ResizablePanelGroup
+			direction="horizontal"
+			className="h-fit"
+			style={{ height: undefined }}
+		>
+			<ResizablePanel>
+				<DBSchema schema={schema} connections={connections} />
+			</ResizablePanel>
+			<ResizableHandle withHandle />
+			<ResizablePanel>Editor</ResizablePanel>
+		</ResizablePanelGroup>
+	);
 };
 
 const router = createHashRouter([
